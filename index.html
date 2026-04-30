@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gerador de Orçamentos | Amado Maker</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="hero">
+    <div>
+      <p class="tag">Amado Maker</p>
+      <h1>Gerador de Orçamentos por Equipamento</h1>
+      <p class="subtitle">Cole o pedido bruto, gere orçamentos separados e envie facilmente para fornecedores.</p>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="panel input-panel">
+      <label for="pedidoBruto">Pedido bruto</label>
+      <textarea id="pedidoBruto" placeholder="Cole aqui o pedido completo..."></textarea>
+
+      <div class="actions">
+        <button id="gerarBtn" class="primary">Gerar Orçamentos</button>
+        <button id="limparBtn" class="secondary">Limpar</button>
+      </div>
+      <p id="status" class="status" aria-live="polite"></p>
+    </section>
+
+    <section class="results-header">
+      <h2>Orçamentos gerados</h2>
+      <p>Os itens são agrupados automaticamente por equipamento.</p>
+    </section>
+
+    <section id="orcamentos" class="cards"></section>
+  </main>
+
+  <footer>
+    <p>Funciona 100% no navegador. Sem backend, sem banco de dados.</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
