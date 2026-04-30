@@ -1,25 +1,473 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>Gerador de Orçamentos</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Amado Maker - Gerador de Orçamentos</title>
+
+<style>
+:root{
+  --laranja:#ff7417;
+  --roxo:#822fa0;
+  --fundo:#f8f3fb;
+  --texto:#1d1d2b;
+  --card:#ffffff;
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:Arial, Helvetica, sans-serif;
+  background:linear-gradient(135deg,#fff7f0,#f4e9fa);
+  color:var(--texto);
+}
+
+header{
+  background:linear-gradient(135deg,var(--laranja),var(--roxo));
+  color:white;
+  padding:18px 0;
+  box-shadow:0 8px 28px rgba(0,0,0,.18);
+}
+
+.header-inner{
+  width:92%;
+  max-width:1100px;
+  margin:auto;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:20px;
+}
+
+.logo-mini{
+  font-weight:900;
+  line-height:.82;
+}
+
+.logo-mini .amado{
+  color:white;
+  font-size:38px;
+}
+
+.logo-mini .maker{
+  color:#ffe2ff;
+  font-size:32px;
+}
+
+.header-title{
+  text-align:right;
+}
+
+.header-title strong{
+  display:block;
+  font-size:20px;
+}
+
+.header-title span{
+  font-size:14px;
+  opacity:.9;
+}
+
+.container{
+  width:92%;
+  max-width:1100px;
+  margin:auto;
+  padding:34px 0;
+}
+
+.hero{
+  text-align:center;
+  margin-bottom:30px;
+}
+
+.hero h1{
+  font-size:42px;
+  margin:10px 0;
+  color:#21172d;
+}
+
+.hero p{
+  color:#666;
+  font-size:17px;
+}
+
+.card{
+  background:var(--card);
+  border-radius:24px;
+  padding:28px;
+  box-shadow:0 20px 50px rgba(80,40,120,.12);
+  margin-bottom:28px;
+}
+
+label{
+  font-weight:800;
+  display:block;
+  margin-bottom:10px;
+}
+
+textarea{
+  width:100%;
+  height:330px;
+  resize:vertical;
+  border:2px solid #eee;
+  border-radius:18px;
+  padding:18px;
+  font-size:15px;
+  outline:none;
+  background:#fcfcff;
+}
+
+textarea:focus{
+  border-color:var(--roxo);
+}
+
+.acoes{
+  display:flex;
+  gap:14px;
+  flex-wrap:wrap;
+  margin-top:18px;
+}
+
+button{
+  border:0;
+  padding:15px 24px;
+  border-radius:14px;
+  font-weight:900;
+  cursor:pointer;
+  font-size:15px;
+}
+
+.btn-principal{
+  background:linear-gradient(135deg,var(--laranja),var(--roxo));
+  color:white;
+  box-shadow:0 10px 24px rgba(130,47,160,.28);
+}
+
+.btn-secundario{
+  background:#f1e8f6;
+  color:var(--roxo);
+}
+
+.orcamento-card{
+  border-left:8px solid var(--laranja);
+}
+
+.orcamento-topo{
+  display:flex;
+  justify-content:space-between;
+  gap:16px;
+  align-items:center;
+  flex-wrap:wrap;
+  margin-bottom:14px;
+}
+
+.orcamento-topo h2{
+  color:var(--roxo);
+  margin:0;
+}
+
+pre{
+  white-space:pre-wrap;
+  background:#fbf8fd;
+  border:1px solid #eadff0;
+  border-radius:18px;
+  padding:20px;
+  font-size:15px;
+  line-height:1.5;
+  overflow:auto;
+}
+
+.vazio{
+  text-align:center;
+  color:#777;
+  padding:30px;
+}
+
+footer{
+  text-align:center;
+  padding:22px;
+  background:#24112d;
+  color:white;
+  margin-top:40px;
+}
+
+footer strong{
+  color:var(--laranja);
+}
+
+@media(max-width:700px){
+  .header-inner{
+    flex-direction:column;
+    text-align:center;
+  }
+
+  .header-title{
+    text-align:center;
+  }
+
+  .hero h1{
+    font-size:30px;
+  }
+
+  .card{
+    padding:20px;
+  }
+
+  button{
+    width:100%;
+  }
+}
+</style>
 </head>
+
 <body>
 
-  <div class="container">
-    <h1>Gerador de Orçamentos</h1>
-
-    <textarea id="input" placeholder="Cole o pedido aqui..."></textarea>
-
-    <div class="buttons">
-      <button onclick="gerarOrcamentos()">Gerar Orçamentos</button>
-      <button onclick="limpar()">Limpar</button>
+<header>
+  <div class="header-inner">
+    <div class="logo-mini">
+      <div class="amado">amado</div>
+      <div class="maker">maker</div>
     </div>
 
-    <div id="resultado"></div>
+    <div class="header-title">
+      <strong>Gerador de Orçamentos</strong>
+      <span>Separação automática por equipamento</span>
+    </div>
   </div>
+</header>
 
-  <script src="script.js"></script>
+<main class="container">
+
+  <section class="hero">
+    <h1>Orçamentos por Equipamento</h1>
+    <p>Cole o pedido bruto, gere os orçamentos e envie facilmente para fornecedores.</p>
+  </section>
+
+  <section class="card">
+    <label for="pedido">Pedido bruto</label>
+    <textarea id="pedido" placeholder="Cole aqui o pedido completo..."></textarea>
+
+    <div class="acoes">
+      <button class="btn-principal" type="button" id="gerarBtn">Gerar Orçamentos</button>
+      <button class="btn-secundario" type="button" id="limparBtn">Limpar</button>
+    </div>
+  </section>
+
+  <section id="resultado">
+    <div class="vazio">Os orçamentos aparecerão aqui separados por equipamento.</div>
+  </section>
+
+</main>
+
+<footer>
+  Criação de <strong>José Marmo</strong> - Líder Técnico
+</footer>
+
+<script>
+const pedidoInput = document.getElementById("pedido");
+const resultado = document.getElementById("resultado");
+const gerarBtn = document.getElementById("gerarBtn");
+const limparBtn = document.getElementById("limparBtn");
+
+gerarBtn.addEventListener("click", gerarOrcamentos);
+limparBtn.addEventListener("click", limparTudo);
+
+function pegarCampo(texto, campo){
+  const linhas = texto.split(/\r?\n/);
+  const campoNormalizado = campo.toLowerCase();
+
+  for(const linha of linhas){
+    const pos = linha.indexOf(":");
+    if(pos === -1) continue;
+
+    const chave = linha.substring(0,pos).trim().toLowerCase();
+    const valor = linha.substring(pos + 1).trim();
+
+    if(chave === campoNormalizado){
+      return valor || "Não informado";
+    }
+  }
+
+  return "Não informado";
+}
+
+function normalizarEquipamento(nome){
+  return nome
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g,"")
+    .replace(/[-–—_/]/g," ")
+    .replace(/\s+/g," ")
+    .trim();
+}
+
+function gerarOrcamentos(){
+  const texto = pedidoInput.value;
+
+  if(!texto.trim()){
+    alert("Cole o pedido bruto primeiro.");
+    return;
+  }
+
+  resultado.innerHTML = "";
+
+  const pedidoID = pegarCampo(texto, "Pedido ID");
+  const entregaTexto = texto.split(/---\s*ENTREGA\s*---/i)[1] || "";
+
+  const entrega = {
+    destinatario: pegarCampo(entregaTexto, "Destinatário"),
+    cpf: pegarCampo(entregaTexto, "CPF"),
+    endereco: pegarCampo(entregaTexto, "Endereço"),
+    complemento: pegarCampo(entregaTexto, "Complemento"),
+    bairro: pegarCampo(entregaTexto, "Bairro"),
+    cidade: pegarCampo(entregaTexto, "Cidade"),
+    cep: pegarCampo(entregaTexto, "CEP")
+  };
+
+  const grupos = {};
+  const regexItens = /Item\s+\d+([\s\S]*?)(?=Item\s+\d+|---\s*ENTREGA\s*---|$)/gi;
+  let match;
+
+  while((match = regexItens.exec(texto)) !== null){
+    const bloco = match[1];
+
+    const produto = pegarCampo(bloco, "Produto");
+    const equipamento = pegarCampo(bloco, "Equipamento");
+    const quantidade = pegarCampo(bloco, "Quantidade");
+
+    if(equipamento === "Não informado") continue;
+
+    const chave = normalizarEquipamento(equipamento);
+
+    if(!grupos[chave]){
+      grupos[chave] = {
+        nome: equipamento,
+        itens: []
+      };
+    }
+
+    grupos[chave].itens.push({produto, equipamento, quantidade});
+  }
+
+  const equipamentos = Object.values(grupos);
+
+  if(equipamentos.length === 0){
+    resultado.innerHTML = '<div class="card vazio">Nenhum item com equipamento foi encontrado.</div>';
+    return;
+  }
+
+  equipamentos.forEach((grupo) => {
+    let orcamento = `Razão Social: Amado Tecnologia LTDA
+CNPJ: 21.580.609/0001-57
+Inscrição Estadual SP: 353.603.412.111
+
+ORÇAMENTO - ${grupo.nome}
+Pedido ID: ${pedidoID}
+
+`;
+
+    grupo.itens.forEach((item, index) => {
+      orcamento += `Item ${index + 1}
+Produto: ${item.produto}
+Equipamento: ${item.equipamento}
+Quantidade: ${item.quantidade}
+
+`;
+    });
+
+    orcamento += `--- ENTREGA ---
+Destinatário: ${entrega.destinatario}
+CPF: ${entrega.cpf}
+Endereço: ${entrega.endereco}
+Complemento: ${entrega.complemento}
+Bairro: ${entrega.bairro}
+Cidade: ${entrega.cidade}
+CEP: ${entrega.cep}`;
+
+    criarCardOrcamento(grupo.nome, orcamento);
+  });
+}
+
+function criarCardOrcamento(nomeEquipamento, textoOrcamento){
+  const card = document.createElement("div");
+  card.className = "card orcamento-card";
+
+  const topo = document.createElement("div");
+  topo.className = "orcamento-topo";
+
+  const titulo = document.createElement("h2");
+  titulo.textContent = nomeEquipamento;
+
+  const acoes = document.createElement("div");
+  acoes.className = "acoes";
+
+  const copiarBtn = document.createElement("button");
+  copiarBtn.className = "btn-principal";
+  copiarBtn.type = "button";
+  copiarBtn.textContent = "Copiar orçamento";
+  copiarBtn.onclick = () => copiarTexto(textoOrcamento);
+
+  const baixarBtn = document.createElement("button");
+  baixarBtn.className = "btn-secundario";
+  baixarBtn.type = "button";
+  baixarBtn.textContent = "Baixar TXT";
+  baixarBtn.onclick = () => baixarTXT(nomeEquipamento, textoOrcamento);
+
+  const pre = document.createElement("pre");
+  pre.textContent = textoOrcamento;
+
+  acoes.appendChild(copiarBtn);
+  acoes.appendChild(baixarBtn);
+
+  topo.appendChild(titulo);
+  topo.appendChild(acoes);
+
+  card.appendChild(topo);
+  card.appendChild(pre);
+
+  resultado.appendChild(card);
+}
+
+function copiarTexto(texto){
+  const area = document.createElement("textarea");
+  area.value = texto;
+  area.style.position = "fixed";
+  area.style.left = "-9999px";
+  document.body.appendChild(area);
+  area.focus();
+  area.select();
+
+  try{
+    document.execCommand("copy");
+    alert("Orçamento copiado!");
+  }catch(e){
+    alert("Não foi possível copiar automaticamente. Selecione o texto e copie manualmente.");
+  }
+
+  document.body.removeChild(area);
+}
+
+function baixarTXT(nome, texto){
+  const blob = new Blob([texto], {type:"text/plain;charset=utf-8"});
+  const url = URL.createObjectURL(blob);
+
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "orcamento-" + nome.replace(/[^\wÀ-ÿ]+/g,"-").toLowerCase() + ".txt";
+
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  URL.revokeObjectURL(url);
+}
+
+function limparTudo(){
+  pedidoInput.value = "";
+  resultado.innerHTML = '<div class="vazio">Os orçamentos aparecerão aqui separados por equipamento.</div>';
+}
+</script>
+
 </body>
 </html>
