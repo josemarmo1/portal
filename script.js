@@ -1,122 +1,142 @@
+const input = document.querySelector("textarea");
+const resultado = document.querySelector("#resultado, #results, .results");
+
+document.addEventListener("click", function (e) {
+  const textoBotao = e.target.innerText?.toLowerCase() || "";
+
+  if (textoBotao.includes("gerar")) {
+    gerarOrcamentos();
+  }
+
+  if (textoBotao.includes("limpar")) {
+    input.value = "";
+    if (resultado) resultado.innerHTML = "";
+  }
+});
+
+function valor(texto, campo) {
+  const regex = new RegExp(campo + "\\s*:\\s*(.*)", "i");
+  const match = texto.match(regex);
+  return match ? match[1].trim() : "Não informado";
+}
+
 function normalizarEquipamento(nome) {
   return nome
     .toLowerCase()
-    .replace(/[-]/g, '')
-    .replace(/\s+/g, ' ')
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[-–—]/g, " ")
+    .replace(/\s+/g, " ")
     .trim();
 }
 
 function gerarOrcamentos() {
-  const texto = document.getElementById("input").value;
-  const resultado = document.getElementById("resultado");
-  resultado.innerHTML = "";
+  const texto = input.value;
 
   if (!texto.trim()) {
-    alert("Cole um pedido primeiro!");
+    alert("Cole o pedido primeiro.");
     return;
   }
 
-  const pedidoID = (texto.match(/Pedido ID:\s*(\d+)/) || [])[1] || "Não informado";
+  const areaResultado = resultado || document.querySelector("body");
+  areaResultado.innerHTML = "";
+
+  const pedidoID = valor(texto, "Pedido ID");
+
+  const entregaTexto = texto.split(/---\s*ENTREGA\s*---/i)[1] || "";
 
   const entrega = {
-    destinatario: (texto.match(/Destinatário:\s*(.*)/) || [])[1] || "",
-    cpf: (texto.match(/CPF:\s*(.*)/) || [])[1] || "",
-    endereco: (texto.match(/Endereço:\s*(.*)/) || [])[1] || "",
-    complemento: (texto.match(/Complemento:\s*(.*)/) || [])[1] || "",
-    bairro: (texto.match(/Bairro:\s*(.*)/) || [])[1] || "",
-    cidade: (texto.match(/Cidade:\s*(.*)/) || [])[1] || "",
-    cep: (texto.match(/CEP:\s*(.*)/) || [])[1] || ""
+    destinatario: valor(entregaTexto, "Destinatário"),
+    cpf: valor(entregaTexto, "CPF"),
+    endereco: valor(entregaTexto, "Endereço"),
+    complemento: valor(entregaTexto, "Complemento"),
+    bairro: valor(entregaTexto, "Bairro"),
+    cidade: valor(entregaTexto, "Cidade"),
+    cep: valor(entregaTexto, "CEP")
   };
 
-  const itensRaw = texto.split("Item").slice(1);
-
+  const blocosItens = texto.split(/\n\s*Item\s+\d+/i).slice(1);
   const grupos = {};
 
-  itensRaw.forEach((bloco, index) => {
-    const produto = (bloco.match(/Produto:\s*(.*)/) || [])[1] || "";
-    const equipamento = (bloco.match(/Equipamento:\s*(.*)/) || [])[1] || "";
-    const quantidade = (bloco.match(/Quantidade:\s*(.*)/) || [])[1] || "";
+  blocosItens.forEach((bloco) => {
+    const produto = valor(bloco, "Produto");
+    const equipamento = valor(bloco, "Equipamento");
+    const quantidade = valor(bloco, "Quantidade");
 
-    if (!equipamento) return;
+    if (equipamento === "Não informado") return;
 
     const chave = normalizarEquipamento(equipamento);
 
     if (!grupos[chave]) {
       grupos[chave] = {
-        nomeOriginal: equipamento,
+        equipamentoOriginal: equipamento,
         itens: []
       };
     }
 
-    grupos[chave].itens.push({
-      produto,
-      equipamento,
-      quantidade
-    });
+    grupos[chave].itens.push({ produto, equipamento, quantidade });
   });
 
+  if (Object.keys(grupos).length === 0) {
+    alert("Nenhum item com equipamento foi encontrado.");
+    return;
+  }
+
   Object.values(grupos).forEach((grupo) => {
-    let textoFinal = `
-Razão Social: Amado Tecnologia LTDA
+    let orcamento = `Razão Social: Amado Tecnologia LTDA
 CNPJ: 21.580.609/0001-57
 Inscrição Estadual SP: 353.603.412.111
 
-ORÇAMENTO - ${grupo.nomeOriginal}
+ORÇAMENTO - ${grupo.equipamentoOriginal}
 Pedido ID: ${pedidoID}
+
 `;
 
-    grupo.itens.forEach((item, i) => {
-      textoFinal += `
-Item ${i + 1}
+    grupo.itens.forEach((item, index) => {
+      orcamento += `Item ${index + 1}
 Produto: ${item.produto}
 Equipamento: ${item.equipamento}
 Quantidade: ${item.quantidade}
+
 `;
     });
 
-    textoFinal += `
---- ENTREGA ---
+    orcamento += `--- ENTREGA ---
 Destinatário: ${entrega.destinatario}
 CPF: ${entrega.cpf}
 Endereço: ${entrega.endereco}
 Complemento: ${entrega.complemento}
 Bairro: ${entrega.bairro}
 Cidade: ${entrega.cidade}
-CEP: ${entrega.cep}
-`;
+CEP: ${entrega.cep}`;
 
     const card = document.createElement("div");
-    card.className = "card";
+    card.className = "card quote-card";
 
     const pre = document.createElement("pre");
-    pre.textContent = textoFinal;
+    pre.textContent = orcamento;
 
-    const copiarBtn = document.createElement("button");
-    copiarBtn.textContent = "Copiar";
-    copiarBtn.onclick = () => {
-      navigator.clipboard.writeText(textoFinal);
-      alert("Copiado!");
+    const copiar = document.createElement("button");
+    copiar.textContent = "Copiar orçamento";
+    copiar.onclick = () => {
+      navigator.clipboard.writeText(orcamento);
+      alert("Orçamento copiado!");
     };
 
-    const baixarBtn = document.createElement("button");
-    baixarBtn.textContent = "Baixar TXT";
-    baixarBtn.onclick = () => {
-      const blob = new Blob([textoFinal], { type: "text/plain" });
+    const baixar = document.createElement("button");
+    baixar.textContent = "Baixar em TXT";
+    baixar.onclick = () => {
+      const blob = new Blob([orcamento], { type: "text/plain;charset=utf-8" });
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
-      link.download = "orcamento.txt";
+      link.download = `orcamento-${grupo.equipamentoOriginal}.txt`;
       link.click();
     };
 
     card.appendChild(pre);
-    card.appendChild(copiarBtn);
-    card.appendChild(baixarBtn);
+    card.appendChild(copiar);
+    card.appendChild(baixar);
 
-    resultado.appendChild(card);
+    areaResultado.appendChild(card);
   });
-}
-
-function limpar() {
-  document.getElementById("input").value = "";
-  document.getElementById("resultado").innerHTML = "";
 }
